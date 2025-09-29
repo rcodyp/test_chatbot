@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            color: white;
+            background-color: black;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .chatbot {
+            height: 50px;
+            width: 50px;
+            background-color: rgb(51, 37, 144);
+            border-radius: 50%;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+            width: 450px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .respond {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message {
+            padding: 8px;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+
+        .user {
+            background-color: rgb(51, 37, 144);
+            align-self: flex-end;
+        }
+
+        .bot {
+            background-color: #444;
+            align-self: flex-start;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: rgb(51, 37, 144);
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 style="margin-left: 20px;">Chatbot Page</h1>
+
+    <div class="chatbot" onclick="handleClick()">💬</div>
+
+    <div class="popup" id="popup">
+        <h3>Desi Chatbot</h3>
+
+        <div class="respond" id="respond"></div>
+
+        <div class="input-container">
+            <input type="text" placeholder="Type your message..." id="user">
+            <button onclick="submitMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        let isOpen = false;
+
+        function handleClick() {
+            isOpen = !isOpen;
+            document.getElementById('popup').style.display = isOpen ? 'flex' : 'none';
+        }
+
+        async function submitMessage() {
+            const userInput = document.getElementById('user').value.trim();
+            if (!userInput) return;
+
+            // Display user message
+            addMessage(userInput, 'user');
+
+            // Clear input field
+            document.getElementById('user').value = '';
+
+            try {
+                const response = await fetch("http://localhost:8000/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        session_id: "user123",
+                        question: userInput
+                    }),
+                });
+
+                const obj = await response.json();
+                const answer = obj.answer; // get only answer from JSON
+
+                // Display bot response
+                addMessage(answer, 'bot');
+
+            } catch (error) {
+                console.log({ msg: error });
+                addMessage("Sorry, something went wrong.", 'bot');
+            }
+        }
+
+        function addMessage(text, type) {
+            const respondDiv = document.getElementById('respond');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${type}`;
+            msgDiv.textContent = text;
+            respondDiv.appendChild(msgDiv);
+            respondDiv.scrollTop = respondDiv.scrollHeight; // auto-scroll
+        }
+
+        // Optional: allow Enter key to send message
+        document.getElementById('user').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') submitMessage();
+        });
+    </script>
+</body>
+
+</html>
