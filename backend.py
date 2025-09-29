@@ -21,11 +21,11 @@ PPLX_API_KEY = ""
 if not os.environ.get("USER_AGENT"):
     os.environ["USER_AGENT"] = "rahul-chatbot/1.0"
 
-# if not os.getenv("PPLX_API_KEY"):
-#     raise ValueError(
-#         "Missing PPLX_API_KEY in your environment. "
-#         "Add it to your .env file (PPLX_API_KEY=...)."
-#     )
+if not os.getenv("PPLX_API_KEY"):
+    raise ValueError(
+        "Missing PPLX_API_KEY in your environment. "
+        "Add it to your .env file (PPLX_API_KEY=...)."
+    )
 
 # Initialize LLM
 llm = init_chat_model("sonar", model_provider="perplexity", api_key=PPLX_API_KEY)
